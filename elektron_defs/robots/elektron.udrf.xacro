@@ -24,7 +24,8 @@
 		<visual>
 			<origin xyz="-0.0 0 0.115" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://elektron_defs/meshes/elektron_body.blend"/>
+<box size="0.38 0.28 0.20" />
+				<!--<mesh filename="package://elektron_defs/meshes/elektron_body.blend"/>-->
 			</geometry>
 		</visual>
 
@@ -50,6 +51,7 @@
 			<joint_properties damping="0.0" friction="0.0" />
 			<parent link="${parent}" />
 			<child link="${parent}_${suffix}_wheel_link" />
+ <dynamics damping="0.0" friction="0.0"/>
 		</joint>
 
 		<link name="${parent}_${suffix}_wheel_link">
@@ -71,26 +73,58 @@
 				<geometry>
 					<cylinder radius="${wheel_radius}" length="${wheel_length}" />
 				</geometry>
+<!-- <surface>
+            <friction>
+              <ode>
+                <mu>${m}</mu>
+                <mu2>${m}</mu2>
+                <fdir1>1.000000 0.000000 0.000000</fdir1>
+                <slip1>10000.000000</slip1>
+                <slip2>10000.000000</slip2>
+              </ode>
+            </friction>
+            <bounce>
+              <restitution_coefficient>0.000000</restitution_coefficient>
+              <threshold>100000.000000</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <soft_cfm>0.000000</soft_cfm>
+                <soft_erp>0.200000</soft_erp>
+                <kp>100000.000000</kp>
+                <kd>1.000000</kd>
+                <max_vel>100.000000</max_vel>
+                <min_depth>0.001000</min_depth>
+              </ode>
+            </contact>
+          </surface> -->
 			</collision>
 		</link>
-
-		<gazebo reference="${parent}_${suffix}_wheel_link" >
+<gazebo reference="${parent}_${suffix}_wheel_link">
+      <mu1 value="${m}" />
+      <mu2 value="${m}" />
+      <kp value="100000.0" />
+      <kd value="0.00001" />
+      <maxVel value="1.0" />
+      <minDepth value="0.0001" />
+    </gazebo>    
+	<!--	<gazebo reference="${parent}_${suffix}_wheel_link" >
 			<elem key="mu1" value="${m}" />
 			<elem key="mu2" value="${m}" />
 			<elem key="kp"  value="100000000.0" />
 			<elem key="kd"  value="1.0" />
-		</gazebo>
+		</gazebo> -->
 	</xacro:macro>
 
 
-	<xacro:erratic_wheel suffix="left" parent="base_link" reflect="1" offset="0" m="0.1"/>
-	<xacro:erratic_wheel suffix="left_front" parent="base_link" reflect="1" offset="0.15" m="100.1"/>
-	<xacro:erratic_wheel suffix="left_rear" parent="base_link" reflect="1" offset="-0.15" m="100.1"/>
+	<xacro:erratic_wheel suffix="left" parent="base_link" reflect="1" offset="0" m="0.900"/>
+	<xacro:erratic_wheel suffix="left_front" parent="base_link" reflect="1" offset="0.15" m="0"/>
+	<xacro:erratic_wheel suffix="left_rear" parent="base_link" reflect="1" offset="-0.15" m="0"/>
 
-	<xacro:erratic_wheel suffix="right" parent="base_link" reflect="-1" offset="0" m="0.1"/>
+	<xacro:erratic_wheel suffix="right" parent="base_link" reflect="-1" offset="0" m="0.900"/>
 	<xacro:erratic_wheel suffix="right_front" parent="base_link" reflect="-1" offset="0.15"
-		m="100.1"/>
-	<xacro:erratic_wheel suffix="right_rear" parent="base_link" reflect="-1" offset="-0.15"	m="100.1"/>
+		m="0"/>
+	<xacro:erratic_wheel suffix="right_rear" parent="base_link" reflect="-1" offset="-0.15"	m="0"/>
 
 	<joint name="base_laser_joint" type="fixed">
 		<origin rpy="0 0 0" xyz="0.14 0 0.3"/>
@@ -147,21 +181,22 @@
 			</controller:gazebo_ros_laser>
 		</sensor:ray>
 	</gazebo>
-
 	<gazebo>
-		<controller:diffdrive_plugin name="differential_drive_controller" plugin="libdiffdrive_plugin.so">
+		<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
 			<alwaysOn>true</alwaysOn>
-			<update>100</update>
-			<updateRate>100.0</updateRate>
+			<updateRate>100</updateRate>
 			<leftJoint>base_link_right_wheel_joint</leftJoint>
 			<rightJoint>base_link_left_wheel_joint</rightJoint>
 			<wheelSeparation>${caster_wheel_offset_y*2}</wheelSeparation>
 			<wheelDiameter>${wheel_radius*2}</wheelDiameter>
 			<torque>5</torque>
-			<interface:position name="position_iface_0"/>
-			<robotNamespace>/</robotNamespace>
-			<topicName>cmd_vel</topicName>
-		</controller:diffdrive_plugin>
+			<commandTopic>cmd_vel</commandTopic>
+			<odometryTopic>odom</odometryTopic>
+			<odometryFrame>odom</odometryFrame>
+			<robotBaseFrame>base_link</robotBaseFrame>
+		</plugin>
+	</gazebo>
+	<gazebo>
 
 		<controller:gazebo_ros_p3d name="p3d_base_controller" plugin="libgazebo_ros_p3d.so">
 			<alwaysOn>true</alwaysOn>
