@@ -1,5 +1,5 @@
-float32 yaw
-float32 pitch
+int32 yaw
+int32 pitch
 ---
 byte status
 

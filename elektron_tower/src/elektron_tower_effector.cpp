@@ -19,13 +19,14 @@ std::string toString(double d) {
 	ss << d;
 	return ss.str();
 }
-bool sendAngles( double yaw, double pitch){
+bool sendAngles( int yaw, int pitch){
 		const char* message_char;
-		std::string message_str = toString(yaw)+" "+toString(pitch);
+		std::string message_str = toString(pitch)+" "+toString(yaw)+"\n";
 		message_char = message_str.c_str();
 		//std::cout<<message_char<<std::endl;
 	if(fd!=-1){
 		write(fd,message_char,strlen(message_char));
+
 		ROS_INFO_STREAM("New position of the Elektron tower is set:\n"
 		<<"yaw: "<<yaw<<" | pitch: "<<pitch);
 		return true;
